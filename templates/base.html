@@ -1,80 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="htmlRoot">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransitOps - {% block title %}{% endblock %}</title>
+    <title>TransitOps – {% block title %}{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
     <style>
-        .sidebar-link:hover { background: rgba(255,255,255,0.1); }
-        .sidebar-link.active { background: rgba(255,255,255,0.15); border-left: 3px solid #f59e0b; }
+        .sidebar-link { transition: all 0.15s; }
+        .sidebar-link:hover { background: rgba(255,255,255,0.08); }
+        .sidebar-link.active { background: rgba(245,158,11,0.2); border-left: 3px solid #f59e0b; color: #fbbf24 !important; }
+        .sidebar-link.active i { color: #fbbf24; }
+        .toast { animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(110%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+        .dark .card { background: #1f2937; border-color: #374151; }
+        .dark body { background: #111827; }
     </style>
 </head>
-<body class="bg-gray-100 flex">
+<body class="bg-gray-100 dark:bg-gray-900 flex min-h-screen transition-colors duration-200">
 
     <!-- Sidebar -->
-    <div class="w-64 min-h-screen bg-gray-900 text-white flex flex-col fixed">
+    <div class="w-60 min-h-screen bg-gray-900 text-white flex flex-col fixed top-0 left-0 z-20 shadow-xl">
         <div class="p-5 border-b border-gray-700">
-            <h1 class="text-xl font-bold text-amber-400">⚡ TransitOps</h1>
-            <p class="text-xs text-gray-400 mt-1">Smart Transport Platform</p>
+            <div class="flex items-center gap-2">
+                <span class="text-amber-400 text-2xl">⚡</span>
+                <div>
+                    <h1 class="text-lg font-bold text-white leading-tight">TransitOps</h1>
+                    <p class="text-xs text-gray-400">Smart Transport Platform</p>
+                </div>
+            </div>
         </div>
-        <nav class="flex-1 p-4 space-y-1">
-            <a href="/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-dashboard"></i> Dashboard
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
+            <a href="/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-layout-dashboard text-lg w-5"></i> Dashboard
             </a>
-            <a href="/vehicles/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-truck"></i> Fleet
+            {% if request.user.role != 'financial_analyst' and request.user.role != 'safety_officer' %}
+            <a href="/vehicles/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-truck text-lg w-5"></i> Fleet
             </a>
-            <a href="/drivers/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-user"></i> Drivers
+            {% endif %}
+            <a href="/drivers/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-user-check text-lg w-5"></i> Drivers
             </a>
-            <a href="/trips/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-map"></i> Trips
+            {% if request.user.role != 'financial_analyst' and request.user.role != 'safety_officer' %}
+            <a href="/trips/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-map-2 text-lg w-5"></i> Trips
             </a>
-            <a href="/maintenance/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-tool"></i> Maintenance
+            {% endif %}
+            {% if request.user.role != 'financial_analyst' and request.user.role != 'safety_officer' %}
+            <a href="/maintenance/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-tool text-lg w-5"></i> Maintenance
             </a>
-            <a href="/fuel/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-gas-station"></i> Fuel & Expenses
+            {% endif %}
+            {% if request.user.role != 'safety_officer' %}
+            <a href="/fuel/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-gas-station text-lg w-5"></i> Fuel & Expenses
             </a>
-            <a href="/analytics/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-chart-bar"></i> Analytics
+            {% endif %}
+            <a href="/analytics/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-chart-bar text-lg w-5"></i> Analytics
             </a>
-            <a href="/admin/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
-                <i class="ti ti-settings"></i> Settings
+            <div class="border-t border-gray-700 my-2"></div>
+            {% if request.user.is_superuser %}
+            <a href="/admin/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-settings text-lg w-5"></i> Admin Panel
             </a>
+            {% endif %}
         </nav>
-        <div class="p-4 border-t border-gray-700 text-xs text-gray-500">
-            TransitOps v1.0
+        <!-- User info bottom -->
+        <div class="p-4 border-t border-gray-700">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    {{ request.user.first_name|first|upper|default:request.user.username|first|upper }}
+                </div>
+                <div class="overflow-hidden">
+                    <p class="text-white text-xs font-medium truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p class="text-gray-400 text-xs capitalize">{{ request.user.role|default:"user"|cut:"_"|title }}</p>
+                </div>
+            </div>
+            <a href="/accounts/logout/" class="flex items-center gap-2 text-gray-400 hover:text-white text-xs transition">
+                <i class="ti ti-logout"></i> Sign out
+            </a>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="ml-64 flex-1 flex flex-col min-h-screen">
-        <!-- Top bar -->
-        <div class="bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-10">
-            <h2 class="text-lg font-semibold text-gray-700">{% block page_title %}{% endblock %}</h2>
+    <div class="ml-60 flex-1 flex flex-col">
+        <!-- Topbar -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm px-6 py-3 flex items-center justify-between sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
+            <h2 class="text-base font-semibold text-gray-700 dark:text-gray-200">{% block page_title %}{% endblock %}</h2>
             <div class="flex items-center gap-3">
-                <span class="text-sm text-gray-500">Fleet Manager</span>
-                <div class="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm">F</div>
+                <span class="text-xs bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">● Live</span>
+                <!-- Dark mode toggle -->
+                <button onclick="toggleDark()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Toggle dark mode">
+                    <i class="ti ti-moon dark:hidden"></i>
+                    <i class="ti ti-sun hidden dark:block"></i>
+                </button>
+                <span class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize">
+                    {{ request.user.role|default:""|cut:"_"|title }}
+                </span>
             </div>
         </div>
-        <!-- Page Content -->
-        <div class="p-6 flex-1">
+
+        <!-- Toast Messages -->
+        {% if messages %}
+        <div class="fixed top-16 right-4 z-50 space-y-2 max-w-sm">
+            {% for message in messages %}
+            <div class="toast flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-sm font-medium
+                {% if message.tags == 'error' %}bg-red-500 text-white
+                {% elif message.tags == 'success' %}bg-green-500 text-white
+                {% elif message.tags == 'warning' %}bg-amber-500 text-white
+                {% else %}bg-blue-500 text-white{% endif %}">
+                {% if message.tags == 'error' %}<i class="ti ti-alert-circle text-lg"></i>
+                {% elif message.tags == 'success' %}<i class="ti ti-circle-check text-lg"></i>
+                {% else %}<i class="ti ti-info-circle text-lg"></i>{% endif %}
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <script>setTimeout(() => document.querySelectorAll('.toast').forEach(t => t.style.opacity='0'), 3500);</script>
+        {% endif %}
+
+        <div class="p-6 flex-1 dark:text-gray-100">
             {% block content %}{% endblock %}
         </div>
     </div>
 
     <script>
-        // Active sidebar link
-        const links = document.querySelectorAll('.sidebar-link');
-        links.forEach(link => {
-            if (link.href === window.location.href) {
+        // Active sidebar
+        const path = window.location.pathname;
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            const href = new URL(link.href).pathname;
+            if (href === '/' ? path === '/' : path.startsWith(href)) {
                 link.classList.add('active');
             }
         });
+
+        // Dark mode
+        function toggleDark() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('dark', document.documentElement.classList.contains('dark'));
+        }
+        if (localStorage.getItem('dark') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
     </script>
     {% block extra_js %}{% endblock %}
 </body>
