@@ -8,11 +8,18 @@
 <div class="grid grid-cols-2 gap-4">
 <div class="col-span-2 sm:col-span-1">
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Registration Number *</label>
-<input type="text" name="registration_number" required value="{{ vehicle.registration_number|default:post.registration_number }}" {% if action == 'Edit' %}readonly{% endif %} class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="MH-01-AB-1234">
+<input type="text" name="registration_number" required
+  value="{% if vehicle %}{{ vehicle.registration_number }}{% endif %}"
+  {% if action == 'Edit' %}readonly{% endif %}
+  class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+  placeholder="MH-01-AB-1234">
 </div>
 <div class="col-span-2 sm:col-span-1">
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Vehicle Name *</label>
-<input type="text" name="name" required value="{{ vehicle.name|default:post.name }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Tata Ace Gold">
+<input type="text" name="name" required
+  value="{% if vehicle %}{{ vehicle.name }}{% endif %}"
+  class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+  placeholder="Tata Ace Gold">
 </div>
 <div>
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type *</label>
@@ -25,15 +32,23 @@
 </div>
 <div>
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Max Load Capacity (kg) *</label>
-<input type="number" name="max_load_capacity" required step="0.1" value="{{ vehicle.max_load_capacity|default:post.max_load_capacity }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="500">
+<input type="number" name="max_load_capacity" required step="0.1"
+  value="{% if vehicle %}{{ vehicle.max_load_capacity }}{% endif %}"
+  class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+  placeholder="500">
 </div>
 <div>
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Odometer (km)</label>
-<input type="number" name="odometer" step="0.1" value="{{ vehicle.odometer|default:0 }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<input type="number" name="odometer" step="0.1"
+  value="{% if vehicle %}{{ vehicle.odometer }}{% else %}0{% endif %}"
+  class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
 </div>
 <div>
 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Acquisition Cost (₹) *</label>
-<input type="number" name="acquisition_cost" required step="0.01" value="{{ vehicle.acquisition_cost|default:post.acquisition_cost }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="500000">
+<input type="number" name="acquisition_cost" required step="0.01"
+  value="{% if vehicle %}{{ vehicle.acquisition_cost }}{% endif %}"
+  class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+  placeholder="500000">
 </div>
 {% if action == 'Edit' %}
 <div class="col-span-2">

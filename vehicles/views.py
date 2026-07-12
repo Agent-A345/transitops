@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import HttpResponse
-from vehicles.models import Vehicle
+from vehicles.models import Vehicle, VehicleDocument
 from drivers.models import Driver
 from trips.models import Trip
 from accounts.decorators import login_required_custom, role_required
@@ -29,6 +29,15 @@ def dashboard(request):
     )
     expired = Driver.objects.filter(license_expiry__lt=date.today())
 
+    # Expiring documents alert
+    expiring_docs = VehicleDocument.objects.filter(
+        expiry_date__lte=date.today() + timedelta(days=30),
+        expiry_date__gte=date.today()
+    ).select_related('vehicle')
+    expired_docs = VehicleDocument.objects.filter(
+        expiry_date__lt=date.today()
+    ).select_related('vehicle')
+
     return render(request, 'dashboard.html', {
         'total_vehicles': total_vehicles,
         'available_vehicles': available_vehicles,
@@ -43,6 +52,8 @@ def dashboard(request):
         'recent_trips': recent_trips,
         'expiring_soon': expiring_soon,
         'expired': expired,
+        'expiring_docs': expiring_docs,
+        'expired_docs': expired_docs,
     })
 
 
@@ -63,7 +74,6 @@ def vehicle_list(request):
                    Vehicle.objects.filter(name__icontains=search)
     vehicles = vehicles.order_by(sort)
 
-    # Export CSV
     if request.GET.get('export') == 'csv':
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="vehicles.csv"'
@@ -117,9 +127,11 @@ def vehicle_detail(request, pk):
     trips = Trip.objects.filter(vehicle=vehicle).order_by('-created_at')
     maintenance = vehicle.maintenancelog_set.all().order_by('-created_at')
     fuel_logs = vehicle.fuellog_set.all().order_by('-date')
+    documents = vehicle.documents.all().order_by('-uploaded_at')
     return render(request, 'vehicles/detail.html', {
         'vehicle': vehicle, 'trips': trips,
         'maintenance': maintenance, 'fuel_logs': fuel_logs,
+        'documents': documents,
     })
 
 
@@ -149,3 +161,41 @@ def vehicle_delete(request, pk):
         messages.success(request, 'Vehicle deleted.')
         return redirect('vehicle_list')
     return render(request, 'vehicles/confirm_delete.html', {'vehicle': vehicle})
+
+
+# ── Document views ──────────────────────────────────────────
+
+@login_required_custom
+@role_required('fleet_manager')
+def document_upload(request, vehicle_pk):
+    vehicle = get_object_or_404(Vehicle, pk=vehicle_pk)
+    if request.method == 'POST':
+        doc_type = request.POST.get('doc_type')
+        title = request.POST.get('title')
+        expiry_date = request.POST.get('expiry_date') or None
+        file = request.FILES.get('file')
+        if not file:
+            messages.error(request, 'Please select a file to upload.')
+            return redirect('vehicle_detail', pk=vehicle_pk)
+        VehicleDocument.objects.create(
+            vehicle=vehicle,
+            doc_type=doc_type,
+            title=title,
+            file=file,
+            expiry_date=expiry_date,
+        )
+        messages.success(request, f'Document "{title}" uploaded successfully!')
+        return redirect('vehicle_detail', pk=vehicle_pk)
+    return render(request, 'vehicles/document_upload.html', {'vehicle': vehicle})
+
+
+@login_required_custom
+@role_required('fleet_manager')
+def document_delete(request, pk):
+    doc = get_object_or_404(VehicleDocument, pk=pk)
+    vehicle_pk = doc.vehicle.pk
+    if request.method == 'POST':
+        doc.file.delete(save=False)
+        doc.delete()
+        messages.success(request, 'Document deleted.')
+    return redirect('vehicle_detail', pk=vehicle_pk)

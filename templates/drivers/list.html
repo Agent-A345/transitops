@@ -16,9 +16,15 @@
 </form>
 <div class="flex gap-2">
 <a href="?export=csv" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1"><i class="ti ti-download"></i> CSV</a>
+<form method="post" action="/drivers/send-all-reminders/">{% csrf_token %}
+<button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1">
+<i class="ti ti-mail"></i> Send All Reminders
+</button>
+</form>
 <a href="/drivers/add/" class="bg-amber-400 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"><i class="ti ti-plus"></i> Add Driver</a>
 </div>
 </div>
+
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
 <table class="w-full text-sm">
 <thead class="bg-gray-50 dark:bg-gray-900 text-xs text-gray-400 uppercase tracking-wide">
@@ -27,7 +33,10 @@
 <tbody>
 {% for driver in drivers %}
 <tr class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/drivers/{{ driver.id }}/'">
-<td class="px-5 py-3 font-semibold text-gray-800 dark:text-gray-200">{{ driver.name }}</td>
+<td class="px-5 py-3">
+  <p class="font-semibold text-gray-800 dark:text-gray-200">{{ driver.name }}</p>
+  {% if driver.email %}<p class="text-xs text-gray-400">{{ driver.email }}</p>{% endif %}
+</td>
 <td class="px-5 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{{ driver.license_number }}</td>
 <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ driver.license_category }}</td>
 <td class="px-5 py-3">

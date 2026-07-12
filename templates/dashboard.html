@@ -3,117 +3,141 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block content %}
 
+<!-- Alert Banners -->
+{% if expired_docs %}
+<div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-3 flex items-start gap-3">
+  <i class="ti ti-alert-triangle text-red-500 text-xl mt-0.5"></i>
+  <div>
+    <p class="font-semibold text-red-700 dark:text-red-400 text-sm">Expired Vehicle Documents!</p>
+    <p class="text-red-600 dark:text-red-300 text-xs mt-1">{% for d in expired_docs %}{{ d.vehicle.registration_number }}: {{ d.title }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  </div>
+</div>
+{% endif %}
+
+{% if expiring_docs %}
+<div class="bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 rounded-xl p-4 mb-3 flex items-start gap-3">
+  <i class="ti ti-files text-orange-500 text-xl mt-0.5"></i>
+  <div>
+    <p class="font-semibold text-orange-700 dark:text-orange-400 text-sm">Vehicle Documents Expiring Soon</p>
+    <p class="text-orange-600 dark:text-orange-300 text-xs mt-1">{% for d in expiring_docs %}{{ d.vehicle.registration_number }}: {{ d.title }} ({{ d.days_until_expiry }}d){% if not forloop.last %} · {% endif %}{% endfor %}</p>
+  </div>
+</div>
+{% endif %}
+
 {% if expired %}
-<div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-4 flex items-start gap-3">
-    <i class="ti ti-alert-triangle text-red-500 text-xl mt-0.5"></i>
-    <div>
-        <p class="font-semibold text-red-700 dark:text-red-400 text-sm">Expired Licenses — Cannot be assigned to trips!</p>
-        <p class="text-red-600 dark:text-red-300 text-xs mt-1">{% for d in expired %}{{ d.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-    </div>
+<div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl p-4 mb-3 flex items-start gap-3">
+  <i class="ti ti-alert-triangle text-red-500 text-xl mt-0.5"></i>
+  <div>
+    <p class="font-semibold text-red-700 dark:text-red-400 text-sm">Drivers with Expired Licenses — Cannot be assigned!</p>
+    <p class="text-red-600 dark:text-red-300 text-xs mt-1">{% for d in expired %}{{ d.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  </div>
 </div>
 {% endif %}
 
 {% if expiring_soon %}
 <div class="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl p-4 mb-4 flex items-start gap-3">
-    <i class="ti ti-clock text-amber-500 text-xl mt-0.5"></i>
-    <div>
-        <p class="font-semibold text-amber-700 dark:text-amber-400 text-sm">Licenses Expiring Soon</p>
-        <p class="text-amber-600 dark:text-amber-300 text-xs mt-1">{% for d in expiring_soon %}{{ d.name }} ({{ d.days_until_expiry }} days left){% if not forloop.last %}, {% endif %}{% endfor %}</p>
-    </div>
+  <i class="ti ti-clock text-amber-500 text-xl mt-0.5"></i>
+  <div>
+    <p class="font-semibold text-amber-700 dark:text-amber-400 text-sm">Driver Licenses Expiring Soon</p>
+    <p class="text-amber-600 dark:text-amber-300 text-xs mt-1">{% for d in expiring_soon %}{{ d.name }} ({{ d.days_until_expiry }} days){% if not forloop.last %}, {% endif %}{% endfor %}</p>
+  </div>
 </div>
 {% endif %}
 
 <!-- KPI Cards -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-green-100 dark:bg-green-900 p-3 rounded-xl"><i class="ti ti-truck text-green-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Available</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ available_vehicles }}</p><p class="text-xs text-gray-400">of {{ total_vehicles }} vehicles</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-xl"><i class="ti ti-map-2 text-blue-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Active Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ active_trips }}</p><p class="text-xs text-gray-400">{{ pending_trips }} pending</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-tool text-amber-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">In Maintenance</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ in_maintenance }}</p><p class="text-xs text-gray-400">in shop</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-xl"><i class="ti ti-users text-purple-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Drivers On Duty</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ drivers_on_duty }}</p><p class="text-xs text-gray-400">{{ available_drivers }} available</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-red-100 dark:bg-red-900 p-3 rounded-xl"><i class="ti ti-clock text-red-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Pending Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ pending_trips }}</p><p class="text-xs text-gray-400">awaiting dispatch</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-teal-100 dark:bg-teal-900 p-3 rounded-xl"><i class="ti ti-chart-pie text-teal-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Fleet Utilization</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ fleet_utilization }}%</p><p class="text-xs text-gray-400">on the road</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-green-100 dark:bg-green-900 p-3 rounded-xl"><i class="ti ti-circle-check text-green-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Completed Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ completed_trips }}</p><p class="text-xs text-gray-400">all time</p></div>
-    </div>
-    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-        <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-xl"><i class="ti ti-users text-gray-600 text-2xl"></i></div>
-        <div><p class="text-xs text-gray-400 uppercase tracking-wide">Total Drivers</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ total_drivers }}</p><p class="text-xs text-gray-400">registered</p></div>
-    </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-green-100 dark:bg-green-900 p-3 rounded-xl"><i class="ti ti-truck text-green-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Available</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ available_vehicles }}</p><p class="text-xs text-gray-400">of {{ total_vehicles }} vehicles</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-xl"><i class="ti ti-map-2 text-blue-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Active Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ active_trips }}</p><p class="text-xs text-gray-400">{{ pending_trips }} pending</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-tool text-amber-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">In Maintenance</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ in_maintenance }}</p><p class="text-xs text-gray-400">in shop</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-xl"><i class="ti ti-users text-purple-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Drivers On Duty</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ drivers_on_duty }}</p><p class="text-xs text-gray-400">{{ available_drivers }} available</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-red-100 dark:bg-red-900 p-3 rounded-xl"><i class="ti ti-clock text-red-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Pending Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ pending_trips }}</p><p class="text-xs text-gray-400">awaiting dispatch</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-teal-100 dark:bg-teal-900 p-3 rounded-xl"><i class="ti ti-chart-pie text-teal-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Fleet Utilization</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ fleet_utilization }}%</p><p class="text-xs text-gray-400">on the road</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-green-100 dark:bg-green-900 p-3 rounded-xl"><i class="ti ti-circle-check text-green-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Completed Trips</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ completed_trips }}</p><p class="text-xs text-gray-400">all time</p></div>
+  </div>
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center gap-4">
+    <div class="bg-gray-100 dark:bg-gray-700 p-3 rounded-xl"><i class="ti ti-users text-gray-600 text-2xl"></i></div>
+    <div><p class="text-xs text-gray-400 uppercase tracking-wide">Total Drivers</p><p class="text-3xl font-bold text-gray-800 dark:text-white">{{ total_drivers }}</p><p class="text-xs text-gray-400">registered</p></div>
+  </div>
 </div>
 
 <!-- Fleet Utilization Bar -->
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mb-5">
-    <div class="flex justify-between mb-2">
-        <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Fleet Utilization</span>
-        <span class="text-sm font-bold text-amber-500">{{ fleet_utilization }}% <span class="text-gray-400 font-normal text-xs">/ Target 80%</span></span>
-    </div>
-    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
-        <div class="h-3 rounded-full transition-all {% if fleet_utilization >= 80 %}bg-green-500{% elif fleet_utilization >= 50 %}bg-amber-400{% else %}bg-red-400{% endif %}" style="width: {{ fleet_utilization }}%"></div>
-    </div>
+  <div class="flex justify-between mb-2">
+    <span class="text-sm font-semibold text-gray-700 dark:text-gray-200">Fleet Utilization</span>
+    <span class="text-sm font-bold text-amber-500">{{ fleet_utilization }}% <span class="text-gray-400 font-normal text-xs">/ Target 80%</span></span>
+  </div>
+  <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3">
+    <div class="h-3 rounded-full transition-all {% if fleet_utilization >= 80 %}bg-green-500{% elif fleet_utilization >= 50 %}bg-amber-400{% else %}bg-red-400{% endif %}" style="width: {{ fleet_utilization }}%"></div>
+  </div>
 </div>
 
 <!-- Quick Actions -->
-<div class="grid grid-cols-3 gap-4 mb-5">
-    <a href="/vehicles/add/" class="bg-amber-400 hover:bg-amber-500 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
-        <i class="ti ti-plus text-xl"></i><span class="font-medium text-sm">Register Vehicle</span>
-    </a>
-    <a href="/trips/add/" class="bg-blue-500 hover:bg-blue-600 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
-        <i class="ti ti-map-pin text-xl"></i><span class="font-medium text-sm">Create Trip</span>
-    </a>
-    <a href="/maintenance/add/" class="bg-gray-700 hover:bg-gray-800 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
-        <i class="ti ti-tool text-xl"></i><span class="font-medium text-sm">Log Maintenance</span>
-    </a>
+<div class="grid grid-cols-4 gap-4 mb-5">
+  <a href="/vehicles/add/" class="bg-amber-400 hover:bg-amber-500 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
+    <i class="ti ti-plus text-xl"></i><span class="font-medium text-sm">Register Vehicle</span>
+  </a>
+  <a href="/trips/add/" class="bg-blue-500 hover:bg-blue-600 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
+    <i class="ti ti-map-pin text-xl"></i><span class="font-medium text-sm">Create Trip</span>
+  </a>
+  <a href="/maintenance/add/" class="bg-gray-700 hover:bg-gray-800 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
+    <i class="ti ti-tool text-xl"></i><span class="font-medium text-sm">Log Maintenance</span>
+  </a>
+  <a href="/analytics/" class="bg-purple-500 hover:bg-purple-600 text-white rounded-xl p-4 flex items-center gap-3 transition shadow-sm">
+    <i class="ti ti-chart-bar text-xl"></i><span class="font-medium text-sm">View Analytics</span>
+  </a>
 </div>
 
 <!-- Recent Trips -->
 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="font-semibold text-gray-700 dark:text-gray-200">Recent Trips</h3>
-        <a href="/trips/" class="text-xs text-amber-500 hover:underline">View all →</a>
-    </div>
-    <table class="w-full text-sm">
-        <thead><tr class="text-left text-xs text-gray-400 uppercase tracking-wide border-b dark:border-gray-700">
-            <th class="pb-3">Vehicle</th><th class="pb-3">Route</th><th class="pb-3">Driver</th><th class="pb-3">Cargo</th><th class="pb-3">Status</th>
-        </tr></thead>
-        <tbody>
-            {% for trip in recent_trips %}
-            <tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/trips/{{ trip.id }}/'">
-                <td class="py-3 font-medium text-gray-800 dark:text-gray-200">{{ trip.vehicle.registration_number }}</td>
-                <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.source }} → {{ trip.destination }}</td>
-                <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.driver.name }}</td>
-                <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.cargo_weight }} kg</td>
-                <td class="py-3">
-                    {% if trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
-                    {% elif trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Completed</span>
-                    {% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</span>
-                    {% else %}<span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">Draft</span>{% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5" class="py-10 text-center text-gray-400">
-                <i class="ti ti-map-off text-4xl block mb-2"></i>
-                No trips yet. <a href="/trips/add/" class="text-amber-500 hover:underline">Create first trip →</a>
-            </td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="font-semibold text-gray-700 dark:text-gray-200">Recent Trips</h3>
+    <a href="/trips/" class="text-xs text-amber-500 hover:underline">View all →</a>
+  </div>
+  <table class="w-full text-sm">
+    <thead><tr class="text-left text-xs text-gray-400 uppercase tracking-wide border-b dark:border-gray-700">
+      <th class="pb-3">Vehicle</th><th class="pb-3">Route</th><th class="pb-3">Driver</th><th class="pb-3">Cargo</th><th class="pb-3">Status</th>
+    </tr></thead>
+    <tbody>
+      {% for trip in recent_trips %}
+      <tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/trips/{{ trip.id }}/'">
+        <td class="py-3 font-medium text-gray-800 dark:text-gray-200 font-mono text-xs">{{ trip.vehicle.registration_number }}</td>
+        <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.source }} → {{ trip.destination }}</td>
+        <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.driver.name }}</td>
+        <td class="py-3 text-gray-600 dark:text-gray-400">{{ trip.cargo_weight }} kg</td>
+        <td class="py-3">
+          {% if trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+          {% elif trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Completed</span>
+          {% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</span>
+          {% else %}<span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">Draft</span>{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="py-10 text-center text-gray-400">
+        <i class="ti ti-map-off text-4xl block mb-2"></i>
+        No trips yet. <a href="/trips/add/" class="text-amber-500 hover:underline">Create first trip →</a>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endblock %}

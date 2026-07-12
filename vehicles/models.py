@@ -42,3 +42,35 @@ class Vehicle(models.Model):
         if self.acquisition_cost and self.acquisition_cost > 0:
             return round(((self.total_revenue() - self.total_operational_cost()) / self.acquisition_cost) * 100, 2)
         return 0
+
+
+class VehicleDocument(models.Model):
+    DOC_TYPES = [
+        ('rc_book', 'RC Book'),
+        ('insurance', 'Insurance'),
+        ('pollution', 'Pollution Certificate (PUC)'),
+        ('fitness', 'Fitness Certificate'),
+        ('permit', 'Route Permit'),
+        ('other', 'Other'),
+    ]
+    vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name='documents')
+    doc_type = models.CharField(max_length=30, choices=DOC_TYPES)
+    title = models.CharField(max_length=100)
+    file = models.FileField(upload_to='vehicle_docs/')
+    expiry_date = models.DateField(null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.vehicle.registration_number} - {self.title}"
+
+    def is_expired(self):
+        from datetime import date
+        if self.expiry_date:
+            return self.expiry_date < date.today()
+        return False
+
+    def days_until_expiry(self):
+        from datetime import date
+        if self.expiry_date:
+            return (self.expiry_date - date.today()).days
+        return None

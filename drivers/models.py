@@ -20,8 +20,10 @@ class Driver(models.Model):
     license_category = models.CharField(max_length=20, choices=LICENSE_CATEGORIES)
     license_expiry = models.DateField()
     contact = models.CharField(max_length=15)
+    email = models.EmailField(blank=True, help_text="For license expiry reminders")
     safety_score = models.FloatField(default=100)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='available')
+    reminder_sent_at = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

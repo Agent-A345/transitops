@@ -6,9 +6,11 @@
 <form method="post">{% csrf_token %}
 <div class="grid grid-cols-2 gap-4">
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name *</label>
-<input type="text" name="name" required value="{{ driver.name|default:post.name }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Rajesh Kumar"></div>
+<input type="text" name="name" required value="{% if driver %}{{ driver.name }}{% endif %}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Rajesh Kumar"></div>
+
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Number *</label>
-<input type="text" name="license_number" required value="{{ driver.license_number|default:post.license_number }}" {% if action == 'Edit' %}readonly{% endif %} class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+<input type="text" name="license_number" required value="{% if driver %}{{ driver.license_number }}{% endif %}" {% if action == 'Edit' %}readonly{% endif %} class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Category *</label>
 <select name="license_category" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
 <option value="LMV" {% if driver.license_category == 'LMV' %}selected{% endif %}>LMV – Light Motor</option>
@@ -16,19 +18,27 @@
 <option value="HPMV" {% if driver.license_category == 'HPMV' %}selected{% endif %}>HPMV – Heavy Passenger</option>
 <option value="MGV" {% if driver.license_category == 'MGV' %}selected{% endif %}>MGV – Medium Goods</option>
 </select></div>
+
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Expiry *</label>
-<input type="date" name="license_expiry" required value="{{ driver.license_expiry|default:post.license_expiry }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+<input type="date" name="license_expiry" required value="{% if driver %}{{ driver.license_expiry }}{% endif %}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Contact *</label>
-<input type="text" name="contact" required value="{{ driver.contact|default:post.contact }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="9876543210"></div>
+<input type="text" name="contact" required value="{% if driver %}{{ driver.contact }}{% endif %}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="9876543210"></div>
+
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Email <span class="text-gray-400 font-normal normal-case">(for reminders)</span></label>
+<input type="email" name="email" value="{% if driver %}{{ driver.email }}{% endif %}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="driver@email.com"></div>
+
 <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Safety Score (0–100)</label>
-<input type="number" name="safety_score" min="0" max="100" value="{{ driver.safety_score|default:100 }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+<input type="number" name="safety_score" min="0" max="100" value="{% if driver %}{{ driver.safety_score }}{% else %}100{% endif %}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+
 {% if action == 'Edit' %}
-<div class="col-span-2"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
 <select name="status" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
 <option value="available" {% if driver.status == 'available' %}selected{% endif %}>Available</option>
 <option value="off_duty" {% if driver.status == 'off_duty' %}selected{% endif %}>Off Duty</option>
 <option value="suspended" {% if driver.status == 'suspended' %}selected{% endif %}>Suspended</option>
-</select></div>{% endif %}
+</select></div>
+{% endif %}
 </div>
 <div class="flex gap-3 mt-6">
 <button type="submit" class="bg-amber-400 hover:bg-amber-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium">{{ action }} Driver</button>

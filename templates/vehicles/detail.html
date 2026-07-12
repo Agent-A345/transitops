@@ -3,49 +3,136 @@
 {% block page_title %}Vehicle · {{ vehicle.registration_number }}{% endblock %}
 {% block content %}
 <div class="grid grid-cols-3 gap-5 mb-5">
-<div class="col-span-3 lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-<div class="flex items-center gap-3 mb-4">
-<div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-truck text-amber-600 text-2xl"></i></div>
-<div><h2 class="font-bold text-gray-800 dark:text-white text-lg">{{ vehicle.name }}</h2><p class="text-xs text-gray-400 capitalize">{{ vehicle.type }}</p></div>
+
+  <!-- Left: Vehicle Info Card -->
+  <div class="col-span-3 lg:col-span-1 space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-truck text-amber-600 text-2xl"></i></div>
+        <div><h2 class="font-bold text-gray-800 dark:text-white text-lg">{{ vehicle.name }}</h2><p class="text-xs text-gray-400 capitalize">{{ vehicle.type }}</p></div>
+      </div>
+      <div class="space-y-2.5 text-sm">
+        <div class="flex justify-between"><span class="text-gray-400">Reg. Number</span><span class="font-medium dark:text-white font-mono text-xs">{{ vehicle.registration_number }}</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Capacity</span><span class="font-medium dark:text-white">{{ vehicle.max_load_capacity }} kg</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Odometer</span><span class="font-medium dark:text-white">{{ vehicle.odometer }} km</span></div>
+        <div class="flex justify-between"><span class="text-gray-400">Acq. Cost</span><span class="font-medium dark:text-white">₹{{ vehicle.acquisition_cost|floatformat:0 }}</span></div>
+        <div class="flex justify-between items-center"><span class="text-gray-400">Status</span>
+          {% if vehicle.status == 'available' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Available</span>
+          {% elif vehicle.status == 'on_trip' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+          {% elif vehicle.status == 'in_shop' %}<span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium">In Shop</span>
+          {% else %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Retired</span>{% endif %}
+        </div>
+      </div>
+      <!-- Financial Summary -->
+      <div class="border-t dark:border-gray-700 mt-4 pt-4 grid grid-cols-2 gap-3 text-center">
+        <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Fuel Cost</p><p class="font-bold text-blue-600">₹{{ vehicle.total_fuel_cost|floatformat:0 }}</p></div>
+        <div class="bg-amber-50 dark:bg-amber-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Maint. Cost</p><p class="font-bold text-amber-600">₹{{ vehicle.total_maintenance_cost|floatformat:0 }}</p></div>
+        <div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Revenue</p><p class="font-bold text-green-600">₹{{ vehicle.total_revenue|floatformat:0 }}</p></div>
+        <div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">ROI</p><p class="font-bold text-purple-600">{{ vehicle.roi }}%</p></div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <a href="/vehicles/{{ vehicle.id }}/edit/" class="flex-1 text-center bg-amber-400 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Edit</a>
+        <button onclick="window.print()" class="flex-1 text-center bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-medium">🖨 Print PDF</button>
+        <a href="/vehicles/{{ vehicle.id }}/delete/" class="flex-1 text-center bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-medium">Delete</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Tabs Content -->
+  <div class="col-span-3 lg:col-span-2 space-y-5">
+
+    <!-- Documents Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+          <i class="ti ti-files text-amber-500"></i> Vehicle Documents
+        </h3>
+        <a href="/vehicles/{{ vehicle.id }}/documents/upload/" class="bg-amber-400 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1">
+          <i class="ti ti-upload"></i> Upload Doc
+        </a>
+      </div>
+      {% if documents %}
+      <div class="grid grid-cols-2 gap-3">
+        {% for doc in documents %}
+        <div class="border dark:border-gray-700 rounded-xl p-3 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+          <div class="bg-blue-50 dark:bg-blue-900/30 p-2 rounded-lg flex-shrink-0">
+            {% if doc.doc_type == 'insurance' %}<i class="ti ti-shield text-blue-600 text-lg"></i>
+            {% elif doc.doc_type == 'rc_book' %}<i class="ti ti-id text-green-600 text-lg"></i>
+            {% elif doc.doc_type == 'pollution' %}<i class="ti ti-leaf text-teal-600 text-lg"></i>
+            {% elif doc.doc_type == 'fitness' %}<i class="ti ti-heart-rate-monitor text-purple-600 text-lg"></i>
+            {% elif doc.doc_type == 'permit' %}<i class="ti ti-license text-amber-600 text-lg"></i>
+            {% else %}<i class="ti ti-file text-gray-600 text-lg"></i>{% endif %}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-gray-800 dark:text-gray-200 text-sm truncate">{{ doc.title }}</p>
+            <p class="text-xs text-gray-400 capitalize">{{ doc.get_doc_type_display }}</p>
+            {% if doc.expiry_date %}
+              {% if doc.is_expired %}
+                <p class="text-xs text-red-600 font-medium mt-1">⚠ Expired {{ doc.expiry_date }}</p>
+              {% elif doc.days_until_expiry <= 30 %}
+                <p class="text-xs text-amber-600 font-medium mt-1">⚠ Expires in {{ doc.days_until_expiry }}d</p>
+              {% else %}
+                <p class="text-xs text-green-600 mt-1">✓ Valid till {{ doc.expiry_date }}</p>
+              {% endif %}
+            {% endif %}
+            <div class="flex items-center gap-2 mt-2">
+              <a href="{{ doc.file.url }}" target="_blank" class="text-blue-500 hover:underline text-xs flex items-center gap-1">
+                <i class="ti ti-download"></i> Download
+              </a>
+              <form method="post" action="/vehicles/documents/{{ doc.id }}/delete/" class="inline">{% csrf_token %}
+                <button class="text-red-400 hover:text-red-600 text-xs">✕ Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-8 text-gray-400">
+        <i class="ti ti-files text-4xl block mb-2"></i>
+        <p class="text-sm">No documents uploaded yet.</p>
+        <a href="/vehicles/{{ vehicle.id }}/documents/upload/" class="text-amber-500 hover:underline text-xs mt-1 block">Upload first document →</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Trip History -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+      <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2"><i class="ti ti-map-2 text-blue-500"></i> Trip History</h3>
+      <table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Route</th><th class="pb-2 text-left">Driver</th><th class="pb-2 text-left">Status</th><th class="pb-2 text-left">Date</th></tr></thead>
+      <tbody>{% for trip in trips %}<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/trips/{{ trip.id }}/'">
+        <td class="py-2 dark:text-gray-300">{{ trip.source }} → {{ trip.destination }}</td>
+        <td class="py-2 dark:text-gray-300">{{ trip.driver.name }}</td>
+        <td class="py-2">{% if trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Completed</span>{% elif trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">On Trip</span>{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Cancelled</span>{% else %}<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">Draft</span>{% endif %}</td>
+        <td class="py-2 text-gray-400 text-xs">{{ trip.created_at|date:"d M Y" }}</td></tr>
+      {% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No trips yet</td></tr>{% endfor %}</tbody></table>
+    </div>
+
+    <!-- Maintenance History -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+      <h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2"><i class="ti ti-tool text-amber-500"></i> Maintenance History</h3>
+      <table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Issue</th><th class="pb-2 text-left">Priority</th><th class="pb-2 text-left">Cost</th><th class="pb-2 text-left">Status</th></tr></thead>
+      <tbody>{% for m in maintenance %}<tr class="border-b dark:border-gray-700 last:border-0">
+        <td class="py-2 dark:text-gray-300">{{ m.issue|truncatechars:40 }}</td>
+        <td class="py-2 capitalize dark:text-gray-300">{{ m.priority }}</td>
+        <td class="py-2 dark:text-gray-300">₹{{ m.cost }}</td>
+        <td class="py-2">{% if m.status == 'resolved' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Resolved</span>{% elif m.status == 'in_progress' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">In Progress</span>{% elif m.status == 'pending' %}<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">Pending</span>{% else %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Rejected</span>{% endif %}</td>
+      </tr>{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No maintenance records</td></tr>{% endfor %}</tbody></table>
+    </div>
+
+  </div>
 </div>
-<div class="space-y-3 text-sm">
-<div class="flex justify-between"><span class="text-gray-400">Reg. Number</span><span class="font-medium dark:text-white">{{ vehicle.registration_number }}</span></div>
-<div class="flex justify-between"><span class="text-gray-400">Capacity</span><span class="font-medium dark:text-white">{{ vehicle.max_load_capacity }} kg</span></div>
-<div class="flex justify-between"><span class="text-gray-400">Odometer</span><span class="font-medium dark:text-white">{{ vehicle.odometer }} km</span></div>
-<div class="flex justify-between"><span class="text-gray-400">Acq. Cost</span><span class="font-medium dark:text-white">₹{{ vehicle.acquisition_cost|floatformat:0 }}</span></div>
-<div class="flex justify-between items-center"><span class="text-gray-400">Status</span>
-{% if vehicle.status == 'available' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Available</span>
-{% elif vehicle.status == 'on_trip' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
-{% elif vehicle.status == 'in_shop' %}<span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium">In Shop</span>
-{% else %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Retired</span>{% endif %}
-</div>
-</div>
-<div class="border-t dark:border-gray-700 mt-4 pt-4 grid grid-cols-2 gap-3 text-center">
-<div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Fuel Cost</p><p class="font-bold text-blue-600">₹{{ vehicle.total_fuel_cost|floatformat:0 }}</p></div>
-<div class="bg-amber-50 dark:bg-amber-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Maint. Cost</p><p class="font-bold text-amber-600">₹{{ vehicle.total_maintenance_cost|floatformat:0 }}</p></div>
-<div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Revenue</p><p class="font-bold text-green-600">₹{{ vehicle.total_revenue|floatformat:0 }}</p></div>
-<div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">ROI</p><p class="font-bold text-purple-600">{{ vehicle.roi }}%</p></div>
-</div>
-<div class="mt-4 flex gap-2">
-<a href="/vehicles/{{ vehicle.id }}/edit/" class="flex-1 text-center bg-amber-400 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Edit</a>
-<a href="/vehicles/{{ vehicle.id }}/delete/" class="flex-1 text-center bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-medium">Delete</a>
-</div>
-</div>
-<div class="col-span-3 lg:col-span-2 space-y-5">
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3">Trip History</h3>
-<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Route</th><th class="pb-2 text-left">Driver</th><th class="pb-2 text-left">Status</th><th class="pb-2 text-left">Date</th></tr></thead>
-<tbody>{% for trip in trips %}<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-2 dark:text-gray-300">{{ trip.source }} → {{ trip.destination }}</td><td class="py-2 dark:text-gray-300">{{ trip.driver.name }}</td>
-<td class="py-2">{% if trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Completed</span>{% elif trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">On Trip</span>{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Cancelled</span>{% else %}<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">Draft</span>{% endif %}</td>
-<td class="py-2 text-gray-400 text-xs">{{ trip.created_at|date:"d M Y" }}</td></tr>{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No trips yet</td></tr>{% endfor %}</tbody></table>
-</div>
-<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3">Maintenance History</h3>
-<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Issue</th><th class="pb-2 text-left">Priority</th><th class="pb-2 text-left">Cost</th><th class="pb-2 text-left">Status</th></tr></thead>
-<tbody>{% for m in maintenance %}<tr class="border-b dark:border-gray-700 last:border-0"><td class="py-2 dark:text-gray-300">{{ m.issue|truncatechars:40 }}</td><td class="py-2 capitalize dark:text-gray-300">{{ m.priority }}</td><td class="py-2 dark:text-gray-300">₹{{ m.cost }}</td>
-<td class="py-2">{% if m.status == 'resolved' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Resolved</span>{% elif m.status == 'in_progress' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">In Progress</span>{% elif m.status == 'pending' %}<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">Pending</span>{% else %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Rejected</span>{% endif %}</td></tr>
-{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No maintenance records</td></tr>{% endfor %}</tbody></table>
-</div>
-</div>
-</div>
+
+<!-- Print Styles -->
+<style>
+@media print {
+  .sidebar-link, nav, button, a[href*="delete"], a[href*="edit"], a[href*="upload"] { display: none !important; }
+  body { background: white !important; }
+  .dark\:bg-gray-800 { background: white !important; }
+  .shadow-sm { box-shadow: none !important; }
+  .ml-60 { margin-left: 0 !important; }
+  div[class*="fixed"] { display: none !important; }
+  #htmlRoot > body > div:first-child { display: none !important; }
+}
+</style>
 {% endblock %}
