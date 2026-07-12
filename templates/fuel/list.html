@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Fuel & Expenses{% endblock %}
+{% block page_title %}Fuel & Expense Management{% endblock %}
+{% block content %}
+<div class="grid grid-cols-3 gap-4 mb-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex items-center gap-3">
+<div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-xl"><i class="ti ti-gas-station text-blue-600 text-xl"></i></div>
+<div><p class="text-xs text-gray-400">Total Fuel Cost</p><p class="text-xl font-bold text-gray-800 dark:text-white">₹{{ total_fuel_cost|floatformat:0 }}</p></div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex items-center gap-3">
+<div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-receipt text-amber-600 text-xl"></i></div>
+<div><p class="text-xs text-gray-400">Other Expenses</p><p class="text-xl font-bold text-gray-800 dark:text-white">₹{{ total_expense|floatformat:0 }}</p></div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 flex items-center gap-3">
+<div class="bg-red-100 dark:bg-red-900 p-3 rounded-xl"><i class="ti ti-calculator text-red-600 text-xl"></i></div>
+<div><p class="text-xs text-gray-400">Total Operational</p><p class="text-xl font-bold text-red-600">₹{{ total_operational|floatformat:0 }}</p></div>
+</div>
+</div>
+
+<div class="flex justify-end gap-2 mb-4">
+<a href="?export=csv{% if vehicle_filter %}&vehicle={{ vehicle_filter }}{% endif %}" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1"><i class="ti ti-download"></i> Export CSV</a>
+</div>
+
+<div class="grid grid-cols-2 gap-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200">Fuel Logs</h3>
+<a href="/fuel/add/" class="bg-amber-400 hover:bg-amber-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium">+ Add Fuel</a>
+</div>
+<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700">
+<tr><th class="pb-2 text-left">Vehicle</th><th class="pb-2 text-left">Liters</th><th class="pb-2 text-left">Cost</th><th class="pb-2 text-left">Date</th><th class="pb-2"></th></tr>
+</thead>
+<tbody>{% for log in fuel_logs %}
+<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+<td class="py-2 font-mono text-xs font-semibold dark:text-gray-300">{{ log.vehicle.registration_number }}</td>
+<td class="py-2 dark:text-gray-300">{{ log.liters }}L</td>
+<td class="py-2 text-green-700 font-medium">₹{{ log.cost }}</td>
+<td class="py-2 text-gray-400 text-xs">{{ log.date }}</td>
+<td class="py-2"><form method="post" action="/fuel/{{ log.id }}/delete/">{% csrf_token %}<button class="text-red-400 hover:text-red-600 text-xs">✕</button></form></td>
+</tr>
+{% empty %}<tr><td colspan="5" class="py-6 text-center text-gray-400 text-xs">No fuel logs yet</td></tr>{% endfor %}
+</tbody></table>
+</div>
+
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200">Other Expenses</h3>
+<a href="/fuel/expense/add/" class="bg-gray-700 hover:bg-gray-800 text-white px-3 py-1.5 rounded-lg text-xs font-medium">+ Add Expense</a>
+</div>
+<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700">
+<tr><th class="pb-2 text-left">Vehicle</th><th class="pb-2 text-left">Type</th><th class="pb-2 text-left">Amount</th><th class="pb-2 text-left">Date</th><th class="pb-2"></th></tr>
+</thead>
+<tbody>{% for exp in expenses %}
+<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+<td class="py-2 font-mono text-xs font-semibold dark:text-gray-300">{{ exp.vehicle.registration_number }}</td>
+<td class="py-2 capitalize dark:text-gray-300">{{ exp.type }}</td>
+<td class="py-2 text-red-600 font-medium">₹{{ exp.amount }}</td>
+<td class="py-2 text-gray-400 text-xs">{{ exp.date }}</td>
+<td class="py-2"><form method="post" action="/fuel/expense/{{ exp.id }}/delete/">{% csrf_token %}<button class="text-red-400 hover:text-red-600 text-xs">✕</button></form></td>
+</tr>
+{% empty %}<tr><td colspan="5" class="py-6 text-center text-gray-400 text-xs">No expenses yet</td></tr>{% endfor %}
+</tbody></table>
+</div>
+</div>
+{% endblock %}
