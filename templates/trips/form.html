@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Create Trip{% endblock %}
+{% block page_title %}Create Trip{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+<form method="post" id="tripForm">{% csrf_token %}
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Source *</label>
+<input type="text" name="source" required value="{{ post.source }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Mumbai"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Destination *</label>
+<input type="text" name="destination" required value="{{ post.destination }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Pune"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Vehicle *</label>
+<select name="vehicle" id="vehicleSelect" required onchange="updateCapacity()" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="">Select vehicle...</option>
+{% for v in available_vehicles %}<option value="{{ v.id }}" data-capacity="{{ v.max_load_capacity }}" {% if post.vehicle == v.id|stringformat:'s' %}selected{% endif %}>{{ v.registration_number }} – {{ v.name }} ({{ v.max_load_capacity }}kg)</option>{% endfor %}
+</select></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Driver *</label>
+<select name="driver" required class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="">Select driver...</option>
+{% for d in available_drivers %}<option value="{{ d.id }}" {% if post.driver == d.id|stringformat:'s' %}selected{% endif %}>{{ d.name }} ({{ d.license_category }})</option>{% endfor %}
+</select></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cargo Weight (kg) *</label>
+<input type="number" name="cargo_weight" id="cargoWeight" required step="0.1" value="{{ post.cargo_weight }}" oninput="checkCapacity()" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="450">
+<div id="capacityWarning" class="hidden mt-1 text-xs text-red-600 font-medium">⚠ Exceeds vehicle capacity!</div>
+<div id="capacityBar" class="mt-2 hidden"><div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5"><div id="capacityFill" class="h-1.5 rounded-full bg-green-500 transition-all"></div></div><p id="capacityText" class="text-xs text-gray-400 mt-1"></p></div>
+</div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Planned Distance (km) *</label>
+<input type="number" name="planned_distance" required step="0.1" value="{{ post.planned_distance }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="150"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Revenue (₹)</label>
+<input type="number" name="revenue" step="0.01" value="{{ post.revenue|default:0 }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="5000"></div>
+<div class="col-span-2"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Notes</label>
+<textarea name="notes" rows="2" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Any special instructions...">{{ post.notes }}</textarea></div>
+</div>
+<div class="flex gap-3 mt-6">
+<button type="submit" class="bg-amber-400 hover:bg-amber-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium">Create Trip</button>
+<a href="/trips/" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium">Cancel</a>
+</div>
+</form>
+</div>
+{% block extra_js %}
+<script>
+let maxCapacity = 0;
+function updateCapacity() {
+    const sel = document.getElementById('vehicleSelect');
+    const opt = sel.options[sel.selectedIndex];
+    maxCapacity = parseFloat(opt.dataset.capacity || 0);
+    checkCapacity();
+}
+function checkCapacity() {
+    const cargo = parseFloat(document.getElementById('cargoWeight').value || 0);
+    const warn = document.getElementById('capacityWarning');
+    const bar = document.getElementById('capacityBar');
+    const fill = document.getElementById('capacityFill');
+    const text = document.getElementById('capacityText');
+    if (maxCapacity > 0 && cargo > 0) {
+        bar.classList.remove('hidden');
+        const pct = Math.min((cargo / maxCapacity) * 100, 100);
+        fill.style.width = pct + '%';
+        fill.className = 'h-1.5 rounded-full transition-all ' + (pct > 100 ? 'bg-red-500' : pct > 80 ? 'bg-amber-500' : 'bg-green-500');
+        text.textContent = cargo + 'kg of ' + maxCapacity + 'kg (' + pct.toFixed(0) + '%)';
+    }
+    warn.classList.toggle('hidden', !(maxCapacity > 0 && cargo > maxCapacity));
+}
+</script>
+{% endblock %}
+{% endblock %}

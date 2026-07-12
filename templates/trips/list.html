@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Trips{% endblock %}
+{% block page_title %}Trip Management{% endblock %}
+{% block content %}
+<div class="flex flex-wrap gap-3 items-center justify-between mb-5">
+<form method="get" class="flex gap-2 flex-wrap">
+<input name="search" value="{{ search }}" placeholder="Search route..." class="border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 w-40">
+<select name="status" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none">
+<option value="">All Status</option>
+<option value="draft" {% if status_filter == 'draft' %}selected{% endif %}>Draft</option>
+<option value="dispatched" {% if status_filter == 'dispatched' %}selected{% endif %}>Dispatched</option>
+<option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+<option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+</select>
+<button type="submit" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">Filter</button>
+</form>
+<div class="flex gap-2">
+<a href="?export=csv" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1"><i class="ti ti-download"></i> CSV</a>
+<a href="/trips/add/" class="bg-amber-400 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"><i class="ti ti-plus"></i> Create Trip</a>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+<table class="w-full text-sm">
+<thead class="bg-gray-50 dark:bg-gray-900 text-xs text-gray-400 uppercase tracking-wide">
+<tr><th class="px-5 py-3 text-left">#</th><th class="px-5 py-3 text-left">Route</th><th class="px-5 py-3 text-left">Vehicle</th><th class="px-5 py-3 text-left">Driver</th><th class="px-5 py-3 text-left">Cargo</th><th class="px-5 py-3 text-left">Revenue</th><th class="px-5 py-3 text-left">Status</th><th class="px-5 py-3 text-left">Date</th></tr>
+</thead>
+<tbody>
+{% for trip in trips %}
+<tr class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/trips/{{ trip.id }}/'">
+<td class="px-5 py-3 text-gray-400 text-xs">{{ trip.id }}</td>
+<td class="px-5 py-3"><p class="font-medium text-gray-800 dark:text-gray-200">{{ trip.source }}</p><p class="text-xs text-gray-400">→ {{ trip.destination }}</p></td>
+<td class="px-5 py-3 font-mono text-xs text-gray-700 dark:text-gray-300">{{ trip.vehicle.registration_number }}</td>
+<td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ trip.driver.name }}</td>
+<td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ trip.cargo_weight }} kg</td>
+<td class="px-5 py-3 text-green-600 font-medium">₹{{ trip.revenue|floatformat:0 }}</td>
+<td class="px-5 py-3">
+{% if trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+{% elif trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Completed</span>
+{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Cancelled</span>
+{% else %}<span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">Draft</span>{% endif %}
+</td>
+<td class="px-5 py-3 text-gray-400 text-xs">{{ trip.created_at|date:"d M Y" }}</td>
+</tr>
+{% empty %}
+<tr><td colspan="8" class="px-5 py-12 text-center text-gray-400"><i class="ti ti-map-off text-4xl block mb-2"></i>No trips. <a href="/trips/add/" class="text-amber-500 hover:underline">Create first →</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

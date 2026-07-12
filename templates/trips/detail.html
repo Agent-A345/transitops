@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Trip #{{ trip.id }}{% endblock %}
+{% block page_title %}Trip #{{ trip.id }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-3 gap-5">
+<div class="col-span-3 lg:col-span-1 space-y-4">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<div class="mb-4">
+{% if trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-sm font-semibold">🚛 On Trip</span>
+{% elif trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-3 py-1.5 rounded-full text-sm font-semibold">✅ Completed</span>
+{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-3 py-1.5 rounded-full text-sm font-semibold">❌ Cancelled</span>
+{% else %}<span class="bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm font-semibold">📋 Draft</span>{% endif %}
+</div>
+<div class="space-y-2.5 text-sm">
+<div class="flex justify-between"><span class="text-gray-400">From</span><span class="font-medium dark:text-white">{{ trip.source }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">To</span><span class="font-medium dark:text-white">{{ trip.destination }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Vehicle</span><span class="font-mono text-xs font-medium dark:text-white">{{ trip.vehicle.registration_number }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Driver</span><span class="font-medium dark:text-white">{{ trip.driver.name }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Cargo</span><span class="font-medium dark:text-white">{{ trip.cargo_weight }} kg</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Distance</span><span class="font-medium dark:text-white">{{ trip.planned_distance }} km</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Revenue</span><span class="font-medium text-green-600">₹{{ trip.revenue }}</span></div>
+{% if trip.fuel_consumed %}<div class="flex justify-between"><span class="text-gray-400">Fuel Used</span><span class="font-medium dark:text-white">{{ trip.fuel_consumed }} L</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Efficiency</span><span class="font-medium text-blue-600">{{ trip.fuel_efficiency }} km/L</span></div>{% endif %}
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3 text-sm">Actions</h3>
+{% if trip.status == 'draft' %}
+<form method="post" action="/trips/{{ trip.id }}/dispatch/">{% csrf_token %}
+<button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-2.5 rounded-lg text-sm font-medium mb-2">🚀 Dispatch Trip</button></form>
+<a href="/trips/{{ trip.id }}/cancel/" class="block w-full text-center bg-red-50 text-red-600 py-2.5 rounded-lg text-sm font-medium">Cancel Trip</a>
+{% elif trip.status == 'dispatched' %}
+<a href="/trips/{{ trip.id }}/complete/" class="block w-full text-center bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-lg text-sm font-medium mb-2">✅ Complete Trip</a>
+<a href="/trips/{{ trip.id }}/cancel/" class="block w-full text-center bg-red-50 text-red-600 py-2.5 rounded-lg text-sm font-medium">Cancel Trip</a>
+{% else %}<p class="text-gray-400 text-sm text-center py-2">No actions available</p>{% endif %}
+</div>
+</div>
+<div class="col-span-3 lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-5">Trip Timeline</h3>
+<div class="relative pl-6 space-y-6">
+<div class="absolute left-0 top-2 bottom-2 w-0.5 bg-gray-100 dark:bg-gray-700"></div>
+<div class="relative flex gap-4"><div class="absolute -left-6 w-3 h-3 rounded-full bg-green-500 border-2 border-white dark:border-gray-800 shadow"></div>
+<div><p class="font-medium text-gray-800 dark:text-white text-sm">Trip Created</p><p class="text-xs text-gray-400">{{ trip.created_at|date:"d M Y, H:i" }}</p></div></div>
+{% if trip.dispatched_at %}
+<div class="relative flex gap-4"><div class="absolute -left-6 w-3 h-3 rounded-full bg-blue-500 border-2 border-white dark:border-gray-800 shadow"></div>
+<div><p class="font-medium text-gray-800 dark:text-white text-sm">Dispatched</p><p class="text-xs text-gray-400">{{ trip.dispatched_at|date:"d M Y, H:i" }}</p></div></div>{% endif %}
+{% if trip.completed_at %}
+<div class="relative flex gap-4"><div class="absolute -left-6 w-3 h-3 rounded-full bg-green-600 border-2 border-white dark:border-gray-800 shadow"></div>
+<div><p class="font-medium text-gray-800 dark:text-white text-sm">Completed</p><p class="text-xs text-gray-400">{{ trip.completed_at|date:"d M Y, H:i" }}</p>{% if trip.fuel_efficiency %}<p class="text-xs text-green-600 mt-1">⚡ {{ trip.fuel_efficiency }} km/L efficiency</p>{% endif %}</div></div>{% endif %}
+{% if trip.status == 'cancelled' %}
+<div class="relative flex gap-4"><div class="absolute -left-6 w-3 h-3 rounded-full bg-red-500 border-2 border-white dark:border-gray-800 shadow"></div>
+<div><p class="font-medium text-red-600 text-sm">Cancelled</p></div></div>{% endif %}
+</div>
+</div>
+</div>
+{% endblock %}
