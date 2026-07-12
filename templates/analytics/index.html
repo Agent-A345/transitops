@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% block title %}Analytics{% endblock %}
+{% block page_title %}Analytics Dashboard{% endblock %}
+{% block content %}
+<div class="flex justify-end mb-4">
+<a href="?export=csv" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2"><i class="ti ti-download"></i> Export CSV</a>
+<button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2"><i class="ti ti-printer"></i> Print PDF</button>
+</div>
+
+<!-- KPI Cards -->
+<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 text-center">
+<p class="text-xs text-gray-400 uppercase mb-1">Fleet Utilization</p>
+<p class="text-3xl font-bold text-amber-500">{{ utilization }}%</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 text-center">
+<p class="text-xs text-gray-400 uppercase mb-1">Avg Efficiency</p>
+<p class="text-3xl font-bold text-blue-500">{{ avg_efficiency }}<span class="text-sm font-normal text-gray-400"> km/L</span></p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 text-center">
+<p class="text-xs text-gray-400 uppercase mb-1">Total Revenue</p>
+<p class="text-2xl font-bold text-green-600">₹{{ total_revenue|floatformat:0 }}</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 text-center">
+<p class="text-xs text-gray-400 uppercase mb-1">Total Cost</p>
+<p class="text-2xl font-bold text-red-500">₹{{ total_cost|floatformat:0 }}</p>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 text-center">
+<p class="text-xs text-gray-400 uppercase mb-1">Net Profit</p>
+<p class="text-2xl font-bold {% if profit >= 0 %}text-green-600{% else %}text-red-500{% endif %}">₹{{ profit|floatformat:0 }}</p>
+</div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="grid grid-cols-2 gap-5 mb-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Fleet Status Distribution</h3>
+<div class="flex justify-center"><canvas id="fleetChart" width="220" height="220"></canvas></div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Trip Status Distribution</h3>
+<div class="flex justify-center"><canvas id="tripChart" width="220" height="220"></canvas></div>
+</div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="grid grid-cols-2 gap-5 mb-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Fuel Efficiency by Vehicle (km/L)</h3>
+<canvas id="fuelChart" height="160"></canvas>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Operational Cost by Vehicle (₹)</h3>
+<canvas id="costChart" height="160"></canvas>
+</div>
+</div>
+
+<!-- Charts Row 3 -->
+<div class="grid grid-cols-2 gap-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Top Drivers by Trips Completed</h3>
+<canvas id="driverChart" height="160"></canvas>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 text-sm mb-4">Vehicle ROI (%)</h3>
+<canvas id="roiChart" height="160"></canvas>
+</div>
+</div>
+
+{% block extra_js %}
+<script>
+const isDark = document.documentElement.classList.contains('dark');
+const textColor = isDark ? '#9ca3af' : '#6b7280';
+const gridColor = isDark ? '#374151' : '#f3f4f6';
+
+const fleetData = {{ fleet_status|safe }};
+const tripData = {{ trip_status|safe }};
+const fuelData = {{ fuel_data|safe }};
+const costData = {{ cost_data|safe }};
+const driverData = {{ driver_trips|safe }};
+const roiData = {{ roi_data|safe }};
+
+// Fleet Doughnut
+new Chart(document.getElementById('fleetChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Available', 'On Trip', 'In Shop', 'Retired'],
+        datasets: [{ data: [fleetData.available, fleetData.on_trip, fleetData.in_shop, fleetData.retired],
+            backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444'], borderWidth: 0 }]
+    },
+    options: { cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12, padding: 10 } } } }
+});
+
+// Trip Doughnut
+new Chart(document.getElementById('tripChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Draft', 'Dispatched', 'Completed', 'Cancelled'],
+        datasets: [{ data: [tripData.draft, tripData.dispatched, tripData.completed, tripData.cancelled],
+            backgroundColor: ['#9ca3af', '#3b82f6', '#22c55e', '#ef4444'], borderWidth: 0 }]
+    },
+    options: { cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: textColor, boxWidth: 12, padding: 10 } } } }
+});
+
+// Fuel Efficiency Bar
+new Chart(document.getElementById('fuelChart'), {
+    type: 'bar',
+    data: {
+        labels: fuelData.map(d => d.label),
+        datasets: [{ label: 'km/L', data: fuelData.map(d => d.value),
+            backgroundColor: '#3b82f6', borderRadius: 6 }]
+    },
+    options: { scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } },
+        plugins: { legend: { display: false } } }
+});
+
+// Cost Bar
+new Chart(document.getElementById('costChart'), {
+    type: 'bar',
+    data: {
+        labels: costData.map(d => d.label),
+        datasets: [{ label: '₹ Cost', data: costData.map(d => d.value),
+            backgroundColor: '#ef4444', borderRadius: 6 }]
+    },
+    options: { scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } },
+        plugins: { legend: { display: false } } }
+});
+
+// Top Drivers
+new Chart(document.getElementById('driverChart'), {
+    type: 'bar',
+    data: {
+        labels: driverData.map(d => d.label),
+        datasets: [{ label: 'Trips', data: driverData.map(d => d.value),
+            backgroundColor: '#a855f7', borderRadius: 6 }]
+    },
+    options: { indexAxis: 'y', scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } },
+        plugins: { legend: { display: false } } }
+});
+
+// ROI
+new Chart(document.getElementById('roiChart'), {
+    type: 'bar',
+    data: {
+        labels: roiData.map(d => d.label),
+        datasets: [{ label: 'ROI %', data: roiData.map(d => d.value),
+            backgroundColor: roiData.map(d => d.value >= 0 ? '#22c55e' : '#ef4444'), borderRadius: 6 }]
+    },
+    options: { scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } },
+        plugins: { legend: { display: false } } }
+});
+</script>
+{% endblock %}
+{% endblock %}
+<style>
+@media print {
+  nav, .sidebar-link, button, a[href*="export"] { display: none !important; }
+  .ml-60 { margin-left: 0 !important; }
+  body { background: white !important; }
+  .dark\:bg-gray-800 { background: white !important; }
+}
+</style>
