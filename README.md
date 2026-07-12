@@ -102,7 +102,7 @@ git clone https://github.com/Agent-A345/transitops.git
 cd transitops
 
 # 2. Install dependencies
-pip install django
+pip install -r requirements.txt
 
 # 3. Apply migrations
 python manage.py makemigrations
