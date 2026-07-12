@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-green-100 p-3 rounded-lg"><i class="ti ti-truck text-green-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Available Vehicles</p>
+            <p class="text-2xl font-bold text-gray-800">{{ available_vehicles }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-blue-100 p-3 rounded-lg"><i class="ti ti-map text-blue-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Active Trips</p>
+            <p class="text-2xl font-bold text-gray-800">{{ active_trips }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-amber-100 p-3 rounded-lg"><i class="ti ti-tool text-amber-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">In Maintenance</p>
+            <p class="text-2xl font-bold text-gray-800">{{ in_maintenance }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-purple-100 p-3 rounded-lg"><i class="ti ti-users text-purple-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Drivers On Duty</p>
+            <p class="text-2xl font-bold text-gray-800">{{ drivers_on_duty }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-red-100 p-3 rounded-lg"><i class="ti ti-clock text-red-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Pending Trips</p>
+            <p class="text-2xl font-bold text-gray-800">{{ pending_trips }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-teal-100 p-3 rounded-lg"><i class="ti ti-chart-pie text-teal-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Fleet Utilization</p>
+            <p class="text-2xl font-bold text-gray-800">{{ fleet_utilization }}%</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-orange-100 p-3 rounded-lg"><i class="ti ti-user-check text-orange-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Available Drivers</p>
+            <p class="text-2xl font-bold text-gray-800">{{ available_drivers }}</p>
+        </div>
+    </div>
+    <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4">
+        <div class="bg-gray-100 p-3 rounded-lg"><i class="ti ti-truck-off text-gray-600 text-2xl"></i></div>
+        <div>
+            <p class="text-sm text-gray-500">Total Fleet</p>
+            <p class="text-2xl font-bold text-gray-800">{{ total_vehicles }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Trips -->
+<div class="bg-white rounded-xl shadow p-5 mb-6">
+    <h3 class="font-semibold text-gray-700 mb-4">Recent Trips</h3>
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="text-left text-gray-500 border-b">
+                <th class="pb-2">Vehicle</th>
+                <th class="pb-2">Route</th>
+                <th class="pb-2">Driver</th>
+                <th class="pb-2">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trip in recent_trips %}
+            <tr class="border-b last:border-0 hover:bg-gray-50">
+                <td class="py-2">{{ trip.vehicle.registration_number }}</td>
+                <td class="py-2">{{ trip.source }} → {{ trip.destination }}</td>
+                <td class="py-2">{{ trip.driver.name }}</td>
+                <td class="py-2">
+                    {% if trip.status == 'dispatched' %}
+                        <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs">On Trip</span>
+                    {% elif trip.status == 'completed' %}
+                        <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">Completed</span>
+                    {% elif trip.status == 'cancelled' %}
+                        <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs">Cancelled</span>
+                    {% else %}
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">Draft</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="py-4 text-center text-gray-400">No trips yet</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

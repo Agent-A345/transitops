@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitOps - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+    <style>
+        .sidebar-link:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-link.active { background: rgba(255,255,255,0.15); border-left: 3px solid #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar -->
+    <div class="w-64 min-h-screen bg-gray-900 text-white flex flex-col fixed">
+        <div class="p-5 border-b border-gray-700">
+            <h1 class="text-xl font-bold text-amber-400">⚡ TransitOps</h1>
+            <p class="text-xs text-gray-400 mt-1">Smart Transport Platform</p>
+        </div>
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-dashboard"></i> Dashboard
+            </a>
+            <a href="/vehicles/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-truck"></i> Fleet
+            </a>
+            <a href="/drivers/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-user"></i> Drivers
+            </a>
+            <a href="/trips/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-map"></i> Trips
+            </a>
+            <a href="/maintenance/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-tool"></i> Maintenance
+            </a>
+            <a href="/fuel/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-gas-station"></i> Fuel & Expenses
+            </a>
+            <a href="/analytics/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-chart-bar"></i> Analytics
+            </a>
+            <a href="/admin/" class="sidebar-link flex items-center gap-3 px-3 py-2 rounded text-sm text-gray-300 hover:text-white">
+                <i class="ti ti-settings"></i> Settings
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-700 text-xs text-gray-500">
+            TransitOps v1.0
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 flex-1 flex flex-col min-h-screen">
+        <!-- Top bar -->
+        <div class="bg-white shadow px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+            <h2 class="text-lg font-semibold text-gray-700">{% block page_title %}{% endblock %}</h2>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-gray-500">Fleet Manager</span>
+                <div class="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm">F</div>
+            </div>
+        </div>
+        <!-- Page Content -->
+        <div class="p-6 flex-1">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script>
+        // Active sidebar link
+        const links = document.querySelectorAll('.sidebar-link');
+        links.forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
