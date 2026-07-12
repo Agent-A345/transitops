@@ -1,3 +1,4 @@
+{% load account_tags %}
 <!DOCTYPE html>
 <html lang="en" id="htmlRoot">
 <head>
@@ -5,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransitOps – {% block title %}{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
     <style>
@@ -17,8 +16,6 @@
         .sidebar-link.active i { color: #fbbf24; }
         .toast { animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { transform: translateX(110%); opacity:0; } to { transform: translateX(0); opacity:1; } }
-        .dark .card { background: #1f2937; border-color: #374151; }
-        .dark body { background: #111827; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 flex min-h-screen transition-colors duration-200">
@@ -50,8 +47,6 @@
             <a href="/trips/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
                 <i class="ti ti-map-2 text-lg w-5"></i> Trips
             </a>
-            {% endif %}
-            {% if request.user.role != 'financial_analyst' and request.user.role != 'safety_officer' %}
             <a href="/maintenance/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:text-white">
                 <i class="ti ti-tool text-lg w-5"></i> Maintenance
             </a>
@@ -71,15 +66,18 @@
             </a>
             {% endif %}
         </nav>
+
         <!-- User info bottom -->
         <div class="p-4 border-t border-gray-700">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-8 h-8 bg-amber-400 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {{ request.user.first_name|first|upper|default:request.user.username|first|upper }}
+                    {% if request.user.first_name %}{{ request.user.first_name|first|upper }}{% else %}{{ request.user.username|first|upper }}{% endif %}
                 </div>
                 <div class="overflow-hidden">
-                    <p class="text-white text-xs font-medium truncate">{{ request.user.get_full_name|default:request.user.username }}</p>
-                    <p class="text-gray-400 text-xs capitalize">{{ request.user.role|default:"user"|cut:"_"|title }}</p>
+                    <p class="text-white text-xs font-medium truncate">
+                        {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username|capfirst }}{% endif %}
+                    </p>
+                    <p class="text-gray-400 text-xs">{{ request.user.role|display_role }}</p>
                 </div>
             </div>
             <a href="/accounts/logout/" class="flex items-center gap-2 text-gray-400 hover:text-white text-xs transition">
@@ -95,14 +93,11 @@
             <h2 class="text-base font-semibold text-gray-700 dark:text-gray-200">{% block page_title %}{% endblock %}</h2>
             <div class="flex items-center gap-3">
                 <span class="text-xs bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">● Live</span>
-                <!-- Dark mode toggle -->
                 <button onclick="toggleDark()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Toggle dark mode">
                     <i class="ti ti-moon dark:hidden"></i>
                     <i class="ti ti-sun hidden dark:block"></i>
                 </button>
-                <span class="text-sm text-gray-500 dark:text-gray-400 font-medium capitalize">
-                    {{ request.user.role|default:""|cut:"_"|title }}
-                </span>
+                <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">{{ request.user.role|display_role }}</span>
             </div>
         </div>
 
@@ -131,7 +126,7 @@
     </div>
 
     <script>
-        // Active sidebar
+        // Active sidebar link
         const path = window.location.pathname;
         document.querySelectorAll('.sidebar-link').forEach(link => {
             const href = new URL(link.href).pathname;
