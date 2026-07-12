@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Vehicle{% endblock %}
+{% block page_title %}{{ action }} Vehicle{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+<form method="post">{% csrf_token %}
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Registration Number *</label>
+<input type="text" name="registration_number" required value="{{ vehicle.registration_number|default:post.registration_number }}" {% if action == 'Edit' %}readonly{% endif %} class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="MH-01-AB-1234">
+</div>
+<div class="col-span-2 sm:col-span-1">
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Vehicle Name *</label>
+<input type="text" name="name" required value="{{ vehicle.name|default:post.name }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Tata Ace Gold">
+</div>
+<div>
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Type *</label>
+<select name="type" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="van" {% if vehicle.type == 'van' %}selected{% endif %}>Van</option>
+<option value="truck" {% if vehicle.type == 'truck' %}selected{% endif %}>Truck</option>
+<option value="car" {% if vehicle.type == 'car' %}selected{% endif %}>Car</option>
+<option value="bike" {% if vehicle.type == 'bike' %}selected{% endif %}>Bike</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Max Load Capacity (kg) *</label>
+<input type="number" name="max_load_capacity" required step="0.1" value="{{ vehicle.max_load_capacity|default:post.max_load_capacity }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="500">
+</div>
+<div>
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Odometer (km)</label>
+<input type="number" name="odometer" step="0.1" value="{{ vehicle.odometer|default:0 }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+</div>
+<div>
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Acquisition Cost (₹) *</label>
+<input type="number" name="acquisition_cost" required step="0.01" value="{{ vehicle.acquisition_cost|default:post.acquisition_cost }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="500000">
+</div>
+{% if action == 'Edit' %}
+<div class="col-span-2">
+<label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
+<select name="status" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="available" {% if vehicle.status == 'available' %}selected{% endif %}>Available</option>
+<option value="in_shop" {% if vehicle.status == 'in_shop' %}selected{% endif %}>In Shop</option>
+<option value="retired" {% if vehicle.status == 'retired' %}selected{% endif %}>Retired</option>
+</select>
+</div>
+{% endif %}
+</div>
+<div class="flex gap-3 mt-6">
+<button type="submit" class="bg-amber-400 hover:bg-amber-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium">{{ action }} Vehicle</button>
+<a href="/vehicles/" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium">Cancel</a>
+</div>
+</form>
+</div>
+</div>
+{% endblock %}

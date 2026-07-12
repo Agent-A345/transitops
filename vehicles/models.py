@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Vehicle(models.Model):
     STATUS_CHOICES = [
         ('available', 'Available'),
@@ -24,3 +25,20 @@ class Vehicle(models.Model):
 
     def __str__(self):
         return f"{self.registration_number} - {self.name}"
+
+    def total_fuel_cost(self):
+        return sum(log.cost for log in self.fuellog_set.all())
+
+    def total_maintenance_cost(self):
+        return sum(m.cost for m in self.maintenancelog_set.filter(status='resolved'))
+
+    def total_operational_cost(self):
+        return self.total_fuel_cost() + self.total_maintenance_cost()
+
+    def total_revenue(self):
+        return sum(t.revenue for t in self.trip_set.filter(status='completed') if t.revenue)
+
+    def roi(self):
+        if self.acquisition_cost and self.acquisition_cost > 0:
+            return round(((self.total_revenue() - self.total_operational_cost()) / self.acquisition_cost) * 100, 2)
+        return 0

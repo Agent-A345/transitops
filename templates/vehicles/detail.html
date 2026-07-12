@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}{{ vehicle.registration_number }}{% endblock %}
+{% block page_title %}Vehicle · {{ vehicle.registration_number }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-3 gap-5 mb-5">
+<div class="col-span-3 lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<div class="flex items-center gap-3 mb-4">
+<div class="bg-amber-100 dark:bg-amber-900 p-3 rounded-xl"><i class="ti ti-truck text-amber-600 text-2xl"></i></div>
+<div><h2 class="font-bold text-gray-800 dark:text-white text-lg">{{ vehicle.name }}</h2><p class="text-xs text-gray-400 capitalize">{{ vehicle.type }}</p></div>
+</div>
+<div class="space-y-3 text-sm">
+<div class="flex justify-between"><span class="text-gray-400">Reg. Number</span><span class="font-medium dark:text-white">{{ vehicle.registration_number }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Capacity</span><span class="font-medium dark:text-white">{{ vehicle.max_load_capacity }} kg</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Odometer</span><span class="font-medium dark:text-white">{{ vehicle.odometer }} km</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Acq. Cost</span><span class="font-medium dark:text-white">₹{{ vehicle.acquisition_cost|floatformat:0 }}</span></div>
+<div class="flex justify-between items-center"><span class="text-gray-400">Status</span>
+{% if vehicle.status == 'available' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Available</span>
+{% elif vehicle.status == 'on_trip' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+{% elif vehicle.status == 'in_shop' %}<span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full text-xs font-medium">In Shop</span>
+{% else %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Retired</span>{% endif %}
+</div>
+</div>
+<div class="border-t dark:border-gray-700 mt-4 pt-4 grid grid-cols-2 gap-3 text-center">
+<div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Fuel Cost</p><p class="font-bold text-blue-600">₹{{ vehicle.total_fuel_cost|floatformat:0 }}</p></div>
+<div class="bg-amber-50 dark:bg-amber-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Maint. Cost</p><p class="font-bold text-amber-600">₹{{ vehicle.total_maintenance_cost|floatformat:0 }}</p></div>
+<div class="bg-green-50 dark:bg-green-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">Revenue</p><p class="font-bold text-green-600">₹{{ vehicle.total_revenue|floatformat:0 }}</p></div>
+<div class="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-3"><p class="text-xs text-gray-400">ROI</p><p class="font-bold text-purple-600">{{ vehicle.roi }}%</p></div>
+</div>
+<div class="mt-4 flex gap-2">
+<a href="/vehicles/{{ vehicle.id }}/edit/" class="flex-1 text-center bg-amber-400 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Edit</a>
+<a href="/vehicles/{{ vehicle.id }}/delete/" class="flex-1 text-center bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg text-xs font-medium">Delete</a>
+</div>
+</div>
+<div class="col-span-3 lg:col-span-2 space-y-5">
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3">Trip History</h3>
+<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Route</th><th class="pb-2 text-left">Driver</th><th class="pb-2 text-left">Status</th><th class="pb-2 text-left">Date</th></tr></thead>
+<tbody>{% for trip in trips %}<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700"><td class="py-2 dark:text-gray-300">{{ trip.source }} → {{ trip.destination }}</td><td class="py-2 dark:text-gray-300">{{ trip.driver.name }}</td>
+<td class="py-2">{% if trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Completed</span>{% elif trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">On Trip</span>{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Cancelled</span>{% else %}<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">Draft</span>{% endif %}</td>
+<td class="py-2 text-gray-400 text-xs">{{ trip.created_at|date:"d M Y" }}</td></tr>{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No trips yet</td></tr>{% endfor %}</tbody></table>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3">Maintenance History</h3>
+<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Issue</th><th class="pb-2 text-left">Priority</th><th class="pb-2 text-left">Cost</th><th class="pb-2 text-left">Status</th></tr></thead>
+<tbody>{% for m in maintenance %}<tr class="border-b dark:border-gray-700 last:border-0"><td class="py-2 dark:text-gray-300">{{ m.issue|truncatechars:40 }}</td><td class="py-2 capitalize dark:text-gray-300">{{ m.priority }}</td><td class="py-2 dark:text-gray-300">₹{{ m.cost }}</td>
+<td class="py-2">{% if m.status == 'resolved' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Resolved</span>{% elif m.status == 'in_progress' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">In Progress</span>{% elif m.status == 'pending' %}<span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full text-xs">Pending</span>{% else %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Rejected</span>{% endif %}</td></tr>
+{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No maintenance records</td></tr>{% endfor %}</tbody></table>
+</div>
+</div>
+</div>
+{% endblock %}
