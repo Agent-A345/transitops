@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{{ driver.name }}{% endblock %}
+{% block page_title %}Driver · {{ driver.name }}{% endblock %}
+{% block content %}
+<div class="grid grid-cols-3 gap-5">
+<div class="col-span-3 lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<div class="text-center mb-4">
+<div class="w-16 h-16 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center mx-auto mb-3"><i class="ti ti-user text-amber-600 text-3xl"></i></div>
+<h2 class="font-bold text-gray-800 dark:text-white text-lg">{{ driver.name }}</h2>
+<p class="text-xs text-gray-400 font-mono">{{ driver.license_number }}</p>
+</div>
+<div class="space-y-3 text-sm">
+<div class="flex justify-between"><span class="text-gray-400">Category</span><span class="font-medium dark:text-white">{{ driver.license_category }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Expiry</span><span class="font-medium {% if driver.license_status == 'expired' %}text-red-600{% elif driver.license_status == 'expiring_soon' %}text-amber-600{% else %}text-green-600{% endif %}">{{ driver.license_expiry }}</span></div>
+<div class="flex justify-between"><span class="text-gray-400">Contact</span><span class="font-medium dark:text-white">{{ driver.contact }}</span></div>
+<div class="flex justify-between items-center"><span class="text-gray-400">Status</span>
+{% if driver.status == 'available' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Available</span>
+{% elif driver.status == 'on_trip' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+{% elif driver.status == 'off_duty' %}<span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">Off Duty</span>
+{% else %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Suspended</span>{% endif %}
+</div>
+<div><div class="flex justify-between mb-1"><span class="text-gray-400">Safety Score</span><span class="font-bold dark:text-white">{{ driver.safety_score }}/100</span></div>
+<div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2"><div class="h-2 rounded-full {% if driver.safety_score >= 80 %}bg-green-500{% elif driver.safety_score >= 60 %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {{ driver.safety_score }}%"></div></div>
+</div>
+</div>
+<div class="mt-4 flex gap-2">
+<a href="/drivers/{{ driver.id }}/edit/" class="flex-1 text-center bg-amber-400 hover:bg-amber-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Edit</a>
+<a href="/drivers/{{ driver.id }}/delete/" class="flex-1 text-center bg-red-50 text-red-600 px-3 py-2 rounded-lg text-xs font-medium">Delete</a>
+</div>
+</div>
+<div class="col-span-3 lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
+<h3 class="font-semibold text-gray-700 dark:text-gray-200 mb-3">Trip History</h3>
+<table class="w-full text-sm"><thead class="text-xs text-gray-400 uppercase border-b dark:border-gray-700"><tr><th class="pb-2 text-left">Route</th><th class="pb-2 text-left">Vehicle</th><th class="pb-2 text-left">Status</th><th class="pb-2 text-left">Date</th></tr></thead>
+<tbody>{% for trip in trips %}<tr class="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700">
+<td class="py-2 dark:text-gray-300">{{ trip.source }} → {{ trip.destination }}</td>
+<td class="py-2 font-mono text-xs dark:text-gray-300">{{ trip.vehicle.registration_number }}</td>
+<td class="py-2">{% if trip.status == 'completed' %}<span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs">Completed</span>{% elif trip.status == 'dispatched' %}<span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">On Trip</span>{% elif trip.status == 'cancelled' %}<span class="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs">Cancelled</span>{% else %}<span class="bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs">Draft</span>{% endif %}</td>
+<td class="py-2 text-gray-400 text-xs">{{ trip.created_at|date:"d M Y" }}</td></tr>
+{% empty %}<tr><td colspan="4" class="py-6 text-center text-gray-400 text-xs">No trips yet</td></tr>{% endfor %}</tbody></table>
+</div>
+</div>
+{% endblock %}

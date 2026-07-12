@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Drivers{% endblock %}
+{% block page_title %}Driver Management{% endblock %}
+{% block content %}
+<div class="flex flex-wrap gap-3 items-center justify-between mb-5">
+<form method="get" class="flex gap-2 flex-wrap">
+<input name="search" value="{{ search }}" placeholder="Search name or license..." class="border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 w-48">
+<select name="status" class="border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none">
+<option value="">All Status</option>
+<option value="available" {% if status_filter == 'available' %}selected{% endif %}>Available</option>
+<option value="on_trip" {% if status_filter == 'on_trip' %}selected{% endif %}>On Trip</option>
+<option value="off_duty" {% if status_filter == 'off_duty' %}selected{% endif %}>Off Duty</option>
+<option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>Suspended</option>
+</select>
+<button type="submit" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">Filter</button>
+</form>
+<div class="flex gap-2">
+<a href="?export=csv" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg text-xs font-medium flex items-center gap-1"><i class="ti ti-download"></i> CSV</a>
+<a href="/drivers/add/" class="bg-amber-400 hover:bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"><i class="ti ti-plus"></i> Add Driver</a>
+</div>
+</div>
+<div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+<table class="w-full text-sm">
+<thead class="bg-gray-50 dark:bg-gray-900 text-xs text-gray-400 uppercase tracking-wide">
+<tr><th class="px-5 py-3 text-left">Name</th><th class="px-5 py-3 text-left">License</th><th class="px-5 py-3 text-left">Category</th><th class="px-5 py-3 text-left">Expiry</th><th class="px-5 py-3 text-left">Safety Score</th><th class="px-5 py-3 text-left">Status</th><th class="px-5 py-3 text-left">Actions</th></tr>
+</thead>
+<tbody>
+{% for driver in drivers %}
+<tr class="border-t dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer" onclick="window.location='/drivers/{{ driver.id }}/'">
+<td class="px-5 py-3 font-semibold text-gray-800 dark:text-gray-200">{{ driver.name }}</td>
+<td class="px-5 py-3 text-gray-500 dark:text-gray-400 font-mono text-xs">{{ driver.license_number }}</td>
+<td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ driver.license_category }}</td>
+<td class="px-5 py-3">
+{% if driver.license_status == 'expired' %}<span class="text-red-600 font-medium text-xs">⚠ Expired</span>
+{% elif driver.license_status == 'expiring_soon' %}<span class="text-amber-600 font-medium text-xs">⚠ {{ driver.days_until_expiry }}d left</span>
+{% else %}<span class="text-green-600 text-xs">✓ {{ driver.license_expiry }}</span>{% endif %}
+</td>
+<td class="px-5 py-3">
+<div class="flex items-center gap-2">
+<div class="w-16 bg-gray-100 dark:bg-gray-700 rounded-full h-1.5">
+<div class="h-1.5 rounded-full {% if driver.safety_score >= 80 %}bg-green-500{% elif driver.safety_score >= 60 %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {{ driver.safety_score }}%"></div>
+</div>
+<span class="text-xs font-medium dark:text-gray-300">{{ driver.safety_score }}</span>
+</div>
+</td>
+<td class="px-5 py-3">
+{% if driver.status == 'available' %}<span class="bg-green-100 text-green-700 px-2.5 py-1 rounded-full text-xs font-medium">Available</span>
+{% elif driver.status == 'on_trip' %}<span class="bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full text-xs font-medium">On Trip</span>
+{% elif driver.status == 'off_duty' %}<span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full text-xs font-medium">Off Duty</span>
+{% else %}<span class="bg-red-100 text-red-700 px-2.5 py-1 rounded-full text-xs font-medium">Suspended</span>{% endif %}
+</td>
+<td class="px-5 py-3" onclick="event.stopPropagation()">
+<a href="/drivers/{{ driver.id }}/edit/" class="text-blue-500 hover:underline text-xs mr-2">Edit</a>
+<a href="/drivers/{{ driver.id }}/delete/" class="text-red-400 hover:underline text-xs">Delete</a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="7" class="px-5 py-12 text-center text-gray-400"><i class="ti ti-user-off text-4xl block mb-2"></i>No drivers. <a href="/drivers/add/" class="text-amber-500 hover:underline">Add first →</a></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Driver{% endblock %}
+{% block page_title %}{{ action }} Driver{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+<form method="post">{% csrf_token %}
+<div class="grid grid-cols-2 gap-4">
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Full Name *</label>
+<input type="text" name="name" required value="{{ driver.name|default:post.name }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="Rajesh Kumar"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Number *</label>
+<input type="text" name="license_number" required value="{{ driver.license_number|default:post.license_number }}" {% if action == 'Edit' %}readonly{% endif %} class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Category *</label>
+<select name="license_category" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="LMV" {% if driver.license_category == 'LMV' %}selected{% endif %}>LMV – Light Motor</option>
+<option value="HMV" {% if driver.license_category == 'HMV' %}selected{% endif %}>HMV – Heavy Motor</option>
+<option value="HPMV" {% if driver.license_category == 'HPMV' %}selected{% endif %}>HPMV – Heavy Passenger</option>
+<option value="MGV" {% if driver.license_category == 'MGV' %}selected{% endif %}>MGV – Medium Goods</option>
+</select></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">License Expiry *</label>
+<input type="date" name="license_expiry" required value="{{ driver.license_expiry|default:post.license_expiry }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Contact *</label>
+<input type="text" name="contact" required value="{{ driver.contact|default:post.contact }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" placeholder="9876543210"></div>
+<div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Safety Score (0–100)</label>
+<input type="number" name="safety_score" min="0" max="100" value="{{ driver.safety_score|default:100 }}" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"></div>
+{% if action == 'Edit' %}
+<div class="col-span-2"><label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Status</label>
+<select name="status" class="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300">
+<option value="available" {% if driver.status == 'available' %}selected{% endif %}>Available</option>
+<option value="off_duty" {% if driver.status == 'off_duty' %}selected{% endif %}>Off Duty</option>
+<option value="suspended" {% if driver.status == 'suspended' %}selected{% endif %}>Suspended</option>
+</select></div>{% endif %}
+</div>
+<div class="flex gap-3 mt-6">
+<button type="submit" class="bg-amber-400 hover:bg-amber-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium">{{ action }} Driver</button>
+<a href="/drivers/" class="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium">Cancel</a>
+</div>
+</form>
+</div>
+{% endblock %}
